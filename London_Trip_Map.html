@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>倫敦親子遊 2026 - 行程地圖</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        #map { height: calc(100vh - 64px); width: 100%; z-index: 1;}
+        .leaflet-popup-content-wrapper { border-radius: 8px; }
+        .day-badge { display: inline-block; padding: 2px 6px; border-radius: 4px; color: white; font-weight: bold; font-size: 12px; margin-right: 4px;}
+        .day1 { background-color: #ef4444; }
+        .day2 { background-color: #f97316; }
+        .day3 { background-color: #eab308; }
+        .day4 { background-color: #22c55e; }
+        .day5 { background-color: #3b82f6; }
+        .day6 { background-color: #6366f1; }
+        .day7 { background-color: #a855f7; }
+        .day8 { background-color: #ec4899; }
+    </style>
+</head>
+<body class="bg-gray-100 m-0 p-0 font-sans">
+    <div class="h-16 bg-orange-500 text-white flex items-center px-4 shadow-md sticky top-0 z-50">
+        <h1 class="text-xl font-bold flex items-center"><span class="mr-2">🗺️</span>行程大總匯地圖</h1>
+        <a href="index.html" class="ml-auto bg-white text-orange-600 px-3 py-1.5 rounded-lg font-bold shadow-sm hover:bg-gray-50 text-sm active:bg-gray-100">返回行程表</a>
+    </div>
+    <div id="map"></div>
+
+    <script>
+        // 初始化地圖，中心點設在倫敦市中心
+        var map = L.map('map').setView([51.5074, -0.1278], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors',
+            maxZoom: 18
+        }).addTo(map);
+
+        // 景點座標與資訊
+        var locations = [
+            // Day 1
+            { name: "Airbnb 住宿 (Whitechapel)", lat: 51.515388, lon: -0.057777, day: "🏠", color: "gray", details: "位於交通便利的區域，出發點" },
+            { name: "倫敦塔橋 (Tower Bridge)", lat: 51.5055, lon: -0.0754, day: "Day 1", color: "day1", details: "經典打卡地標，透明步道" },
+            { name: "Sainsbury's 超市採買", lat: 51.5190, lon: -0.0600, day: "Day 1", color: "day1", details: "第一天晚上採買補給品" },
+            { name: "Leadenhall Market", lat: 51.5129, lon: -0.0834, day: "Day 1", color: "day1", details: "哈利波特斜角巷拍攝地" },
+            // Day 2
+            { name: "西敏寺 (Westminster Abbey)", lat: 51.4994, lon: -0.1272, day: "Day 2", color: "day2", details: "皇室加冕教堂" },
+            { name: "白金漢宮衛兵交接 (The Mall)", lat: 51.5037, lon: -0.1349, day: "Day 2", color: "day2", details: "英國皇室經典儀式" },
+            { name: "聖詹姆士公園野餐 (St James's Park)", lat: 51.5024, lon: -0.1348, day: "Day 2", color: "day2", details: "可以餵食松鼠和看鵜鶘" },
+            { name: "聖凱瑟琳碼頭 (St Katharine Docks)", lat: 51.5074, lon: -0.0717, day: "Day 2", color: "day2", details: "優美寧靜的隱藏版遊艇碼頭" },
+            // Day 3
+            { name: "自然史博物館 (Natural History Museum)", lat: 51.4967, lon: -0.1764, day: "Day 3", color: "day3", details: "恐龍骨架、藍鯨標本，小孩最愛" },
+            { name: "科學博物館 (Science Museum)", lat: 51.4978, lon: -0.1745, day: "Day 3", color: "day3", details: "Wonderlab 科學互動展區" },
+            { name: "Harrods 貴婦百貨", lat: 51.4994, lon: -0.1632, day: "Day 3", color: "day3", details: "朝聖頂級百貨與美食街" },
+            { name: "海德公園 (Hyde Park)", lat: 51.5073, lon: -0.1657, day: "Day 3", color: "day3", details: "倫敦最大皇室公園，晚間散步" },
+            // Day 4
+            { name: "大英博物館 (British Museum)", lat: 51.5194, lon: -0.1270, day: "Day 4", color: "day4", details: "羅塞塔石碑、木乃伊必看" },
+            { name: "柯芬園 (Covent Garden)", lat: 51.5117, lon: -0.1240, day: "Day 4", color: "day4", details: "街頭藝人與文創市集" },
+            { name: "Flat Iron 平價牛排", lat: 51.5130, lon: -0.1230, day: "Day 4", color: "day4", details: "CP值極高的 £14 牛排，送冰淇淋" },
+            { name: "M&M's World & 樂高旗艦店", lat: 51.5108, lon: -0.1306, day: "Day 4", color: "day4", details: "萊斯特廣場周邊，小孩的天堂" },
+            // Day 5
+            { name: "波羅市場 (Borough Market)", lat: 51.5055, lon: -0.0905, day: "Day 5", color: "day5", details: "倫敦最古老美食市集，吃遍各國小吃" },
+            { name: "泰特現代藝術館 (Tate Modern)", lat: 51.5076, lon: -0.0994, day: "Day 5", color: "day5", details: "頂樓觀景台免付費看市景" },
+            { name: "千禧橋 (Millennium Bridge)", lat: 51.5100, lon: -0.0984, day: "Day 5", color: "day5", details: "哈利波特拍攝場景，直通聖保羅大教堂" },
+            { name: "南岸女王步道 (The Queen's Walk)", lat: 51.5050, lon: -0.1150, day: "Day 5", color: "day5", details: "泰晤士河畔街頭藝人與舊書攤" },
+            // Day 6
+            { name: "劍橋大學 - 國王學院", lat: 52.2033, lon: 0.1162, day: "Day 6", color: "day6", details: "近郊一日遊，必看國王學院禮拜堂" },
+            { name: "康河撐篙 (Punting)", lat: 52.2015, lon: 0.1158, day: "Day 6", color: "day6", details: "搭船欣賞劍橋最美的學院後花園 (The Backs)" },
+            { name: "國王十字車站 (Pizza Union)", lat: 51.5303, lon: -0.1230, day: "Day 6", color: "day6", details: "平價美味窯烤披薩" },
+            { name: "光影噴泉 (Granary Square)", lat: 51.5350, lon: -0.1250, day: "Day 6", color: "day6", details: "夏日傍晚的親水空間" },
+            // Day 7
+            { name: "Sky Garden / Darwin Brasserie", lat: 51.5112, lon: -0.0837, day: "Day 7", color: "day7", details: "倫敦最高空中花園與豪華早午餐" },
+            { name: "倫敦碼頭區博物館 (Museum of London Docklands)", lat: 51.5078, lon: -0.0216, day: "Day 7", color: "day7", details: "了解倫敦海運歷史與童樂體驗區" },
+            { name: "金絲雀碼頭 (Canary Wharf)", lat: 51.5055, lon: -0.0180, day: "Day 7", color: "day7", details: "金融區高樓大廈群與 Franco Manca 披薩" },
+            { name: "Crossrail Place 屋頂花園", lat: 51.5074, lon: -0.0160, day: "Day 7", color: "day7", details: "免費且無須預約的奇幻室內森林" },
+            // Day 8
+            { name: "倫敦塔 (Tower of London)", lat: 51.5081, lon: -0.0759, day: "Day 8", color: "day8", details: "看皇冠珠寶與千年古堡歷史" },
+            { name: "Wagamama (Tower Hill)", lat: 51.5100, lon: -0.0760, day: "Day 8", color: "day8", details: "平價日式拉麵/咖哩飯，小孩愛吃" }
+        ];
+        
+        var bounds = [];
+        
+        // 客製化 Icon 顏色 (使用 Leaflet default icon 改色比較麻煩，這裡我們利用 DivIcon 產生帶有數字/天數的標籤)
+        locations.forEach(function(loc) {
+            var customIcon = L.divIcon({
+                className: 'custom-div-icon',
+                html: "<div style='background-color: white; border: 2px solid " + (loc.day === '🏠' ? 'gray' : 'black') + "; border-radius: 50%; width: 24px; height: 24px; text-align: center; line-height: 20px; font-weight: bold; font-size: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.3);'>" + (loc.day.replace('Day ', 'D')) + "</div>",
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
+            });
+
+            var marker = L.marker([loc.lat, loc.lon], {icon: customIcon}).addTo(map);
+            
+            var popupContent = `
+                <div class="text-sm">
+                    <div class="font-bold text-gray-800 text-base mb-1">
+                        <span class="day-badge ${loc.color}">${loc.day}</span>
+                        ${loc.name}
+                    </div>
+                    <div class="text-gray-600">${loc.details}</div>
+                    <a href="https://www.google.com/maps/search/?api=1&query=${loc.lat},${loc.lon}" target="_blank" class="inline-block mt-2 text-blue-600 font-semibold hover:underline">
+                        <span class="text-xs">↗ 打開 Google Maps</span>
+                    </a>
+                </div>
+            `;
+            marker.bindPopup(popupContent);
+            bounds.push([loc.lat, loc.lon]);
+        });
+
+        // 自動縮放以顯示所有標記
+        if (bounds.length > 0) {
+            map.fitBounds(bounds, {padding: [30, 30]});
+        }
+    </script>
+</body>
+</html>
