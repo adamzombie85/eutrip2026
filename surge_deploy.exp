@@ -1,0 +1,10 @@
+#!/usr/bin/expect -f
+set timeout 60
+spawn surge "/Users/nelly/Documents/Antigravity/Europe Trip 2026"
+expect "email:"
+send "antigravity_london_2026@mailinator.com\r"
+expect "password:"
+send "antigravity2026\r"
+expect "project:"
+send "london-family-trip-2026.surge.sh\r"
+expect eof
